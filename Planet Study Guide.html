@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Milky Way Galaxy Spelling Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+            position: relative;
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+        }
+
+        .title {
+            text-align: center;
+            padding: 20px;
+            font-size: 2.5rem;
+            color: #4fc3f7;
+            text-shadow: 0 0 10px #4fc3f7, 0 0 20px #4fc3f7;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+        }
+
+        .solar-system {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 40px;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .planet-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.3s;
+            position: relative;
+        }
+
+        .planet-container:hover {
+            transform: scale(1.1);
+        }
+
+        .planet {
+            border-radius: 50%;
+            position: relative;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .smiley {
+            position: absolute;
+            font-size: 1.5rem;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+
+        .planet-name {
+            margin-top: 10px;
+            font-size: 1.2rem;
+            color: #bbdefb;
+            text-align: center;
+        }
+
+        /* Planet sizes relative to Earth (Earth = 50px) */
+        .mercury { width: 19px; height: 19px; background: linear-gradient(to bottom, #8c8c8c, #5a5a5a); }
+        .venus { width: 47px; height: 47px; background: linear-gradient(to bottom, #e39e54, #b56c2a); }
+        .earth { width: 50px; height: 50px; background: linear-gradient(to bottom, #6b93d6, #2c5aa0); }
+        .mars { width: 26px; height: 26px; background: linear-gradient(to bottom, #c1440e, #8c2c0a); }
+        .jupiter { width: 112px; height: 112px; background: linear-gradient(to bottom, #d8ca9d, #b89e65); }
+        .saturn { width: 94px; height: 94px; background: linear-gradient(to bottom, #e3cda5, #c9a86a); }
+        .uranus { width: 40px; height: 40px; background: linear-gradient(to bottom, #b5e3e3, #7fc5c5); }
+        .neptune { width: 39px; height: 39px; background: linear-gradient(to bottom, #5b5bff, #3a3ab3); }
+
+        /* Saturn's rings */
+        .saturn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 130px;
+            height: 30px;
+            background: rgba(210, 180, 140, 0.6);
+            border-radius: 50%;
+            z-index: -1;
+        }
+
+        .spelling-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 30, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #4fc3f7;
+            box-shadow: 0 0 30px rgba(79, 195, 247, 0.7);
+            z-index: 100;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            display: none;
+        }
+
+        .spelling-modal h2 {
+            margin-bottom: 20px;
+            color: #4fc3f7;
+        }
+
+        .spelling-input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            border: 2px solid #4fc3f7;
+            border-radius: 5px;
+            background: rgba(0, 10, 30, 0.8);
+            color: white;
+            text-align: center;
+        }
+
+        .spelling-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .spelling-buttons button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        #submit-spelling {
+            background: #4caf50;
+            color: white;
+        }
+
+        #submit-spelling:hover {
+            background: #388e3c;
+        }
+
+        #cancel-spelling {
+            background: #f44336;
+            color: white;
+        }
+
+        #cancel-spelling:hover {
+            background: #d32f2f;
+        }
+
+        .message {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.2rem;
+            z-index: 100;
+            display: none;
+        }
+
+        .correct {
+            background: rgba(76, 175, 80, 0.9);
+            color: white;
+        }
+
+        .incorrect {
+            background: rgba(244, 67, 54, 0.9);
+            color: white;
+        }
+
+        .completion-message {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 30, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            border: 3px solid #4fc3f7;
+            box-shadow: 0 0 40px rgba(79, 195, 247, 0.8);
+            z-index: 100;
+            text-align: center;
+            display: none;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .completion-message h2 {
+            color: #4fc3f7;
+            margin-bottom: 20px;
+            font-size: 2rem;
+        }
+
+        .completion-message p {
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        #restart-game {
+            padding: 12px 30px;
+            background: #4caf50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        #restart-game:hover {
+            background: #388e3c;
+        }
+
+        .instructions {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #bbdefb;
+            font-size: 1.1rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 0 20px;
+        }
+
+        /* Astronaut styles */
+        .astronaut {
+            position: absolute;
+            width: 60px;
+            height: 80px;
+            z-index: 10;
+            animation: float 20s infinite linear;
+        }
+
+        .astronaut-body {
+            position: absolute;
+            width: 40px;
+            height: 50px;
+            background: white;
+            border-radius: 50% 50% 40% 40%;
+            top: 10px;
+            left: 10px;
+        }
+
+        .astronaut-helmet {
+            position: absolute;
+            width: 35px;
+            height: 35px;
+            background: #e0f7fa;
+            border-radius: 50%;
+            top: 5px;
+            left: 12.5px;
+            border: 2px solid #b2ebf2;
+        }
+
+        .astronaut-visor {
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: #4fc3f7;
+            border-radius: 50%;
+            top: 10px;
+            left: 7.5px;
+        }
+
+        .astronaut-backpack {
+            position: absolute;
+            width: 25px;
+            height: 30px;
+            background: #78909c;
+            border-radius: 5px;
+            top: 35px;
+            left: 17.5px;
+        }
+
+        .astronaut-flag {
+            position: absolute;
+            width: 20px;
+            height: 15px;
+            background: #ff5722;
+            top: 15px;
+            right: -15px;
+            clip-path: polygon(0 0, 100% 50%, 0 100%);
+        }
+
+        @keyframes float {
+            0% {
+                top: 10%;
+                left: 5%;
+                transform: rotate(0deg);
+            }
+            25% {
+                top: 80%;
+                left: 10%;
+                transform: rotate(90deg);
+            }
+            50% {
+                top: 60%;
+                left: 90%;
+                transform: rotate(180deg);
+            }
+            75% {
+                top: 20%;
+                left: 80%;
+                transform: rotate(270deg);
+            }
+            100% {
+                top: 10%;
+                left: 5%;
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <h1 class="title">Milky Way Galaxy Planet Study Guide</h1>
+    
+    <p class="instructions">Click on each planet to test your spelling skills. Titan Business Pros LLC makes science fun!</p>
+    
+    <div class="solar-system">
+        <!-- Planets will be dynamically added here -->
+    </div>
+    
+    <!-- Astronaut floating around -->
+    <div class="astronaut">
+        <div class="astronaut-body"></div>
+        <div class="astronaut-helmet"></div>
+        <div class="astronaut-visor"></div>
+        <div class="astronaut-backpack"></div>
+        <div class="astronaut-flag"></div>
+    </div>
+    
+    <div class="spelling-modal" id="spelling-modal">
+        <h2 id="modal-title">Spell this planet</h2>
+        <input type="text" class="spelling-input" id="spelling-input" placeholder="Type the planet name">
+        <div class="spelling-buttons">
+            <button id="cancel-spelling">Cancel</button>
+            <button id="submit-spelling">Submit</button>
+        </div>
+    </div>
+    
+    <div class="message" id="message"></div>
+    
+    <div class="completion-message" id="completion-message">
+        <h2>Congratulations!</h2>
+        <p>You've successfully spelled all the planets in our solar system! The astronaut is proud of your achievement!</p>
+        <button id="restart-game">Play Again</button>
+    </div>
+
+    <script>
+        // Create stars for background
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 200;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Random position and size
+                const size = Math.random() * 3;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                
+                // Random opacity for twinkling effect
+                star.style.opacity = Math.random() * 0.7 + 0.3;
+                
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Planet data
+        const planets = [
+            { name: "Mercury", size: 19, color: "mercury" },
+            { name: "Venus", size: 47, color: "venus" },
+            { name: "Earth", size: 50, color: "earth" },
+            { name: "Mars", size: 26, color: "mars" },
+            { name: "Jupiter", size: 112, color: "jupiter" },
+            { name: "Saturn", size: 94, color: "saturn" },
+            { name: "Uranus", size: 40, color: "uranus" },
+            { name: "Neptune", size: 39, color: "neptune" }
+        ];
+
+        // Track spelled planets
+        let spelledPlanets = [];
+        let currentPlanet = null;
+
+        // Create planet elements
+        function createPlanets() {
+            const solarSystem = document.querySelector('.solar-system');
+            
+            planets.forEach(planet => {
+                const planetContainer = document.createElement('div');
+                planetContainer.classList.add('planet-container');
+                planetContainer.dataset.planet = planet.name;
+                
+                const planetElement = document.createElement('div');
+                planetElement.classList.add('planet', planet.color);
+                
+                // Add smiley face element (initially hidden)
+                const smiley = document.createElement('div');
+                smiley.classList.add('smiley');
+                smiley.textContent = '😊';
+                planetElement.appendChild(smiley);
+                
+                const planetName = document.createElement('div');
+                planetName.classList.add('planet-name');
+                planetName.textContent = planet.name;
+                
+                planetContainer.appendChild(planetElement);
+                planetContainer.appendChild(planetName);
+                solarSystem.appendChild(planetContainer);
+                
+                // Add click event
+                planetContainer.addEventListener('click', () => {
+                    if (!spelledPlanets.includes(planet.name)) {
+                        openSpellingModal(planet.name);
+                    }
+                });
+            });
+        }
+
+        // Open spelling modal
+        function openSpellingModal(planetName) {
+            currentPlanet = planetName;
+            const modal = document.getElementById('spelling-modal');
+            const title = document.getElementById('modal-title');
+            
+            title.textContent = `Spell: ${planetName}`;
+            document.getElementById('spelling-input').value = '';
+            modal.style.display = 'block';
+            document.getElementById('spelling-input').focus();
+        }
+
+        // Close spelling modal
+        function closeSpellingModal() {
+            document.getElementById('spelling-modal').style.display = 'none';
+            currentPlanet = null;
+        }
+
+        // Check spelling
+        function checkSpelling() {
+            const input = document.getElementById('spelling-input').value.trim().toLowerCase();
+            const correctSpelling = currentPlanet.toLowerCase();
+            
+            if (input === correctSpelling) {
+                // Correct spelling
+                showMessage('Correct! Well done!', 'correct');
+                spelledPlanets.push(currentPlanet);
+                closeSpellingModal();
+                
+                // Show smiley face on the planet
+                const planetElement = document.querySelector(`[data-planet="${currentPlanet}"] .planet .smiley`);
+                planetElement.style.opacity = '1';
+                
+                // Check if all planets are spelled
+                if (spelledPlanets.length === planets.length) {
+                    setTimeout(() => {
+                        document.getElementById('completion-message').style.display = 'block';
+                    }, 1000);
+                }
+            } else {
+                // Incorrect spelling
+                showMessage('Incorrect. Try again!', 'incorrect');
+                document.getElementById('spelling-input').value = '';
+                document.getElementById('spelling-input').focus();
+            }
+        }
+
+        // Show message
+        function showMessage(text, type) {
+            const message = document.getElementById('message');
+            message.textContent = text;
+            message.className = `message ${type}`;
+            message.style.display = 'block';
+            
+            setTimeout(() => {
+                message.style.display = 'none';
+            }, 2000);
+        }
+
+        // Restart game
+        function restartGame() {
+            spelledPlanets = [];
+            currentPlanet = null;
+            document.getElementById('completion-message').style.display = 'none';
+            
+            // Hide all smiley faces
+            const smileys = document.querySelectorAll('.smiley');
+            smileys.forEach(smiley => {
+                smiley.style.opacity = '0';
+            });
+        }
+
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', () => {
+            createStars();
+            createPlanets();
+            
+            // Event listeners
+            document.getElementById('submit-spelling').addEventListener('click', checkSpelling);
+            document.getElementById('cancel-spelling').addEventListener('click', closeSpellingModal);
+            document.getElementById('restart-game').addEventListener('click', restartGame);
+            
+            // Allow Enter key to submit spelling
+            document.getElementById('spelling-input').addEventListener('keyup', (e) => {
+                if (e.key === 'Enter') {
+                    checkSpelling();
+                }
+            });
+            
+            // Close modal if clicking outside of it
+            window.addEventListener('click', (e) => {
+                const modal = document.getElementById('spelling-modal');
+                if (e.target === modal) {
+                    closeSpellingModal();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
